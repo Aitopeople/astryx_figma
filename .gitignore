@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+coverage/
+
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+
+.claude/settings.local.json
+.cursor/
