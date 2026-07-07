@@ -2,6 +2,14 @@
 
 This repository contains the working notes and agent instructions for mirroring the Astryx design system library into Figma and keeping that Figma file aligned with the official documentation.
 
+<img src="Cover.png" alt="Astryx design system cover" width="100%" />
+
+## Figma
+
+View the public Figma Community file:
+
+[Astryx Design System on Figma Community](https://www.figma.com/community/file/1655939158795671259)
+
 ## Document Roles
 
 ### `advise.md`
