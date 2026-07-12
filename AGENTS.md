@@ -3,7 +3,7 @@
 Project-specific guidance for AI coding agents.
 
 <!-- ASTRYX:START -->
-Astryx v0.1.2 · 148 components
+Astryx v0.1.4 · 148 components
 CLI: run every command as `npx astryx <cmd>` (shown below as `astryx ...`).
 
 SETUP (once, in your app entry e.g. main.tsx) — without these, components render unstyled:

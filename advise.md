@@ -7,7 +7,7 @@ The goal is not to create a similar-looking design system. The goal is to keep t
 Figma file:
 
 - Name: `astryx_design_system`
-- Current verified baseline: Astryx `v0.1.3`
+- Current verified baseline: Astryx `v0.1.4`
 - Current handoff summary: `checkpoint.md`
 - Detailed audit history: `logs/`
 
@@ -44,10 +44,16 @@ Use all of these sources together. No single source was complete enough during t
 
 3. Official website
    - Check `https://astryx.atmeta.com/components/<ComponentName>`.
-   - Render the page in a real browser when checking examples.
+   - The site is a **client-rendered SPA**: `WebFetch`/curl return only the app shell, not the rendered Examples. Render in a real browser (Playwright) OR use the preserved crawl below.
    - Do not rely only on curl/raw HTML.
 
-4. Figma MCP
+4. Preserved crawl (the practical authoritative source)
+   - A full crawl of every component page is preserved at the scratchpad path recorded in `checkpoint.md` (`…/e4e5532f…/scratchpad/`).
+   - `pages/<Comp>.json` → `cards[]`; each card has `title`, `text` (the full rendered text of that card), `afterExamples` (true = an Examples card, false = the hero/props region), and `shot` (PNG path). `shots/<Comp>/<n>_<Title>.png` are the visual captures.
+   - **The card `text` field is the authoritative comparison source** for example content and captions — more reliable than screenshots, which abbreviate.
+   - Caveat: this lives in a session temp dir and may be cleaned up. If it is gone, re-crawl before auditing; do not audit from Figma text or memory alone.
+
+5. Figma MCP
    - Use it to inspect and modify the Figma file.
    - Always verify writes in a separate read call.
 
@@ -128,6 +134,50 @@ Required practice:
   - official preview area height
   - Description/Code/Open in Playground strip
   - official description text
+
+## Official Page Structure (do not omit sections)
+
+Each official component page renders, in order:
+
+1. **Usage** — a one-line description + a `ts` import code block (e.g. `import {Button} from '@astryxdesign/core/Button'`). Import paths come from `astryx component <Name> --json` → `.data.import` (exceptions exist: Checkbox→`{CheckboxInput}`, Radio→`{RadioList}`, Tabs→`{TabList}`, Toast→`{Toast}`, etc.).
+2. **Best practices** — a Guidance/Practices table of Do (green) / Don't (red) rows. Not every component has one (Code/Heading/Resizable and many subcomponents are Usage-only). Source: crawl card with `title` starting "Guidance".
+3. **Examples** — the titled example cards (`afterExamples: true`).
+
+The Figma mirror represents these as an `OFFICIAL_USAGE_BEST_PRACTICES / <Name>` box plus the `EXAMPLE / …` frames. When adding/repairing a page, include all three; do not treat Usage/Best-practices as optional.
+
+## Fast Audit Method: Text / Token Diff (preferred over screenshot-per-frame)
+
+Screenshotting every frame is slow and can miss content drift. Instead:
+
+1. In one read-only `use_figma` call, extract each `EXAMPLE /` frame's preview TEXT (join `findAll(TEXT).characters`) + its caption (the TEXT under the `Description` sub-frame). Batch many pages per call via `page.loadAsync()` (no `setCurrentPageAsync` needed for reads).
+2. Diff the token set against the crawl card `text` (strip chrome: `Description`/`Code`/`Open in Playground`, bare day-numbers, aria-labels like `Select row`). Compare captions exactly.
+3. Only screenshot-verify **structural rebuilds** (added/removed items, layout changes) — not every clean page.
+
+This surfaced ~all drift in a fraction of the time. Run the diff in `python` (note: `python3` is not available on this Windows shell; `python` is).
+
+## Two Drift Classes To Check
+
+The 2026-07 full audit found drift concentrated in two predictable places (content components were consistently faithful):
+
+1. **Example CONTENT approximated with generic placeholders** — in structural / layout / disclosure / overlay sets whose examples are scaffolding rather than real data. Confirmed cases: AspectRatio, Grid (all 4), MetadataList (all 3), Layout (Dual Panel / Sidebar Nav schematic), Collapsible (all 4), Dialog (4), CommandPalette (4), Kbd (2). Symptoms: wrong item counts, wrong values/labels, invented icons/headings.
+2. **Paraphrased example CAPTIONS** — only on the aggregate pages (Chat, Navigation), where captions were shortened/reworded vs official. Fix: overwrite each caption with the exact crawl caption (last paragraph of the card `text`).
+
+Content/data components (Table, List, all inputs, Calendar, Slider, Checkbox, Radio, Switch, Pagination, Avatar, Breadcrumbs, Badge, Text, Markdown, Toast, etc.) copied real official data correctly — audit these last, expect clean.
+
+## Figma File Naming Conventions
+
+- Per single-component page: `OFFICIAL_DOCS_SYNC / <Name>` (description + `PROP_ROW / <Comp>.<prop>` rows), `OFFICIAL_COMPONENTS / <Name>` (insertable reps), `OFFICIAL_EXAMPLES / <Name>` (holds `EXAMPLE / <Comp> — <Variant>` frames; note some use `Example /`). Plus `OFFICIAL_USAGE_BEST_PRACTICES / <Name>`.
+- Aggregate pages (Chat, Navigation, Utilities) split into named "Chunk" frames; each documents several subcomponents (props → per-subcomponent Usage/BP box → next). Utilities uses `SECTION_TITLE /` + `PROP_ROW / <Comp> / <prop>`.
+- The hero (crawl card 0, `afterExamples: false`) is **not** an example — it is the page's top showcase. Never promote it to an `EXAMPLE` unless the user explicitly asks.
+
+## use_figma Gotchas Specific To This File
+
+- Example `Description` sub-frames are FIXED height + `clipsContent` — when replacing a caption with longer official text, set the Description frame `primaryAxisSizingMode='AUTO'` (or captions clip).
+- Expandable component instances (Collapsible, etc.) have FIXED height sized to the old content — longer official content overflows onto the next row. Set open instances (and their content TEXT) to `layoutSizingVertical='HUG'`.
+- Rows that overflow horizontally (e.g. Kbd combos) need `layoutWrap='WRAP'` + `counterAxisSizingMode='AUTO'` on the row and a hug-height chain up the parents.
+- `textAutoResize` enum is `NONE|WIDTH_AND_HEIGHT|HEIGHT|TRUNCATE` — there is **no `WIDTH`**.
+- Edit instance content via component properties where they exist (`setProperties({'Title#34:0': …, 'Open': 'true'})`), else via nested text override; multi-char key/badge frames may need hug width to avoid wrapping.
+- CLI fetches: do not bulk-fetch all pages at once (73-page fetch timed out at 7 min). Batch ~10–14 per call.
 
 ## Recommended Workflow For Each Component Page
 
@@ -271,10 +321,12 @@ Important:
 Before writing or changing any example section, confirm all of this:
 
 - MCP `get(<ComponentName>).moreExamples`
-- rendered official webpage `Examples` section
+- rendered official webpage `Examples` section (or the preserved crawl `afterExamples: true` cards)
 - raw payload/showcase metadata if visible examples are absent
 - official sidebar/group membership
 - whether the entry is a component, subcomponent, hook, or non-public implementation detail
+- the **Usage** import line (`.data.import`) and **Best practices** table (crawl "Guidance" card) — these are official page sections, not optional
+- for each example: exact title, exact caption (last paragraph of the crawl card `text`), item COUNT, and every label/value — captions and counts drift silently
 
 Only write `NO_EXAMPLE / <Name>` after both:
 
@@ -285,14 +337,14 @@ Only write `NO_EXAMPLE / <Name>` after both:
 
 As of the latest global audit archived under `logs/` and summarized in `checkpoint.md`:
 
-- Official baseline: Astryx `v0.1.3`
+- Official baseline: Astryx `v0.1.4`
 - Official inventory source: live sidebar, rendered Examples sections, CLI props
 - Figma verified component group pages: 74
 - Verified prop rows: `1425 / 1425`
 - Verified example cards: `408 / 408`
 - Blocking mismatches: `0`
 - Archive pages/nodes: `0`
-- Known exception: `CircularProgress` has a live URL but is absent from the `v0.1.3` sidebar, so it is kept as docs-only with an explicit note.
+- Known exception: `CircularProgress` has a live URL but is absent from the `v0.1.4` sidebar, so it is kept as docs-only with an explicit note.
 
 Do not claim the file is still fully synced after future package/site changes until the global audit is rerun.
 
