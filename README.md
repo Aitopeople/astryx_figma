@@ -4,6 +4,14 @@ This repository contains the working notes and agent instructions for mirroring 
 
 <img src="Cover.png" alt="Astryx design system cover" width="100%" />
 
+## Status
+
+- Verified baseline: **Astryx v0.1.4** (`@astryxdesign/core` + `@astryxdesign/cli` `^0.1.4`).
+- 74 component group pages; props `1425/1425`; example cards `408/408`; 0 blocking mismatches.
+- Every component page carries the official **Usage** (import) + **Best practices** (Do/Don't) sections where they exist, plus official props and examples.
+- Full example-content audit complete (2026-07): example content and captions cross-checked against the official docs; 67 drift fixes applied. See `logs/`.
+- Known exception: `CircularProgress` has a live URL but is absent from the v0.1.4 sidebar, so it is kept as docs-only.
+
 ## Figma
 
 View the public Figma Community file:
@@ -18,9 +26,12 @@ Practical guidance for the Figma mirror work. It defines the core rule: use the 
 
 Main contents:
 
-- Accepted official sources
+- Accepted official sources, including the **preserved crawl** as the practical authoritative source (the official site is a client-rendered SPA, so `WebFetch`/curl return only the shell)
 - How to use Astryx MCP, the Astryx CLI, the official website, and Figma MCP together
-- Failure modes found during earlier work
+- The fast **text/token-diff audit method** (compare Figma preview text against the crawl card text) — preferred over screenshotting every frame
+- The two known **drift classes**: placeholder example content in structural/layout sets, and paraphrased captions on aggregate pages
+- Official page structure (Usage / Best practices / Examples) and the Figma file naming conventions
+- Failure modes and `use_figma` gotchas found during earlier work
 - Verification steps to follow before and after writing to Figma
 
 ### `AGENTS.md`
@@ -63,11 +74,11 @@ The workflow is roughly:
 
 4. Build the component documentation and examples in Figma.
 
-   Each component page should include the official prop table, descriptions, and official examples. Examples should be represented as they appear in the official docs, not replaced with simplified representative samples.
+   Each component page should include the official prop table, the Usage import block, the Best-practices Do/Don't table (where the official page has one), descriptions, and official examples. Examples should be represented as they appear in the official docs — exact titles, captions, item counts, and values — not replaced with simplified or approximated samples.
 
 5. Write through Figma MCP, then read back to verify.
 
-   After creating or modifying nodes in Figma, perform a separate read step to confirm the changes were applied. Existing Figma text or component properties are not treated as official; everything is compared against the official Astryx docs.
+   After creating or modifying nodes in Figma, perform a separate read step to confirm the changes were applied. To audit content efficiently, extract each example's preview text and token-diff it against the preserved crawl card text, then screenshot-verify only the structural rebuilds. Existing Figma text or component properties are not treated as official; everything is compared against the official Astryx docs.
 
 6. Record discrepancies and next steps in `checkpoint.md`.
 
