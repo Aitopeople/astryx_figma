@@ -1,0 +1,29 @@
+name: Library automation checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run library:test
+      - run: npm run library:check-status
+      - name: Check JavaScript syntax
+        shell: bash
+        run: find automation -name '*.mjs' -print0 | xargs -0 -n1 node --check
+
+      # CI is intentionally read-only with respect to Figma. MCP writes require
+      # a human-approved plan receipt in an interactive coordinator session.

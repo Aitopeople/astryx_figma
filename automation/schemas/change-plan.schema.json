@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "astryx-change-plan-v1",
+  "type": "object",
+  "required": ["schemaVersion", "runId", "sourceVersion", "figmaFileKey", "figmaBeforeHash", "generatedAt", "planHash", "operations"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "runId": {"type": "string"},
+    "sourceVersion": {"type": "string"},
+    "figmaFileKey": {"type": "string"},
+    "figmaBeforeHash": {"type": "string"},
+    "generatedAt": {"type": "string"},
+    "planHash": {"type": "string"},
+    "operations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "target", "risk", "evidence", "preconditions", "expected", "verification"]
+      }
+    },
+    "bulkRisk": {"type": "object"},
+    "blockedDifferences": {"type": "array"},
+    "exceptions": {"type": "array"}
+  }
+}

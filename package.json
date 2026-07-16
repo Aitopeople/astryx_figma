@@ -1,12 +1,25 @@
 {
   "scripts": {
-    "astryx": "node node_modules/@astryxdesign/cli/bin/astryx.mjs"
+    "astryx": "node node_modules/@astryxdesign/cli/bin/astryx.mjs",
+    "library:collect": "node automation/scripts/collect-official.mjs",
+    "library:assets": "node automation/scripts/enrich-assets.mjs",
+    "library:normalize-figma": "node automation/scripts/normalize-figma-snapshot.mjs",
+    "library:diff": "node automation/scripts/diff-library.mjs",
+    "library:plan": "node automation/scripts/build-change-plan.mjs",
+    "library:approve": "node automation/scripts/approve-run.mjs",
+    "library:validate": "node automation/scripts/validate-approval.mjs",
+    "library:validate-artifact": "node automation/scripts/validate-artifact.mjs",
+    "library:state": "node automation/scripts/run-state.mjs",
+    "library:verify": "node automation/scripts/verify-run.mjs",
+    "library:report": "node automation/scripts/render-report.mjs",
+    "library:docs": "node automation/scripts/update-docs.mjs",
+    "library:check-status": "node automation/scripts/check-static-status.mjs",
+    "library:test": "node --test automation/tests/schemas.test.mjs automation/tests/diff-library.test.mjs automation/tests/approval-gate.test.mjs automation/tests/policy.test.mjs automation/tests/assets.test.mjs"
   },
   "dependencies": {
-    "@astryxdesign/core": "^0.1.4",
-    "astryx": "^0.0.0"
+    "@astryxdesign/core": "0.1.6"
   },
   "devDependencies": {
-    "@astryxdesign/cli": "^0.1.4"
+    "@astryxdesign/cli": "0.1.6"
   }
 }

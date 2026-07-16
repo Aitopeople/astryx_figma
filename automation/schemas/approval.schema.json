@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "astryx-approval-v1",
+  "type": "object",
+  "required": ["schemaVersion", "runId", "planHash", "figmaBeforeHash", "sourceVersion", "approvedBy", "approvedAt", "expiresAt", "operationIds", "acknowledgedHighRiskIds"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "runId": {"type": "string"},
+    "planHash": {"type": "string"},
+    "figmaBeforeHash": {"type": "string"},
+    "sourceVersion": {"type": "string"},
+    "approvedBy": {"type": "string"},
+    "approvedAt": {"type": "string"},
+    "expiresAt": {"type": "string"},
+    "operationIds": {"type": "array", "items": {"type": "string"}},
+    "acknowledgedHighRiskIds": {"type": "array", "items": {"type": "string"}},
+    "acknowledgedBulkPlanHash": {"type": ["string", "null"]}
+  }
+}

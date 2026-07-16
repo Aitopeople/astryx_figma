@@ -3,12 +3,66 @@ dist/
 build/
 coverage/
 
+# OS and editor-local state
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Secrets and machine-local credentials
 .env
 .env.*
+!.env.example
 *.pem
 *.key
 *.p12
 *.pfx
+.npmrc
+credentials.json
+credentials.*.json
+client_secret*.json
+token.json
+storageState*.json
+*.session.json
+*.har
 
+# Agent/client-local configuration and session state
 .claude/settings.local.json
 .cursor/
+.omx/context/
+.omx/drafts/
+.omx/state/
+.omx/logs/
+.omx/cache/
+.omx/sessions/
+.omx/pipeline-state.json
+.omx/plans/autopilot-spec.md
+.omx/plans/autopilot-impl.md
+.codex/state/
+.codex/logs/
+.codex/sessions/
+
+# Figma automation run payloads; force-add a compact verified run only when it is release evidence.
+automation/runs/*/
+!automation/runs/.gitkeep
+
+# Test/browser output, temporary downloads, and debug artifacts
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+screenshots/
+downloads/
+tmp/
+.tmp/
+*.tmp
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.tgz

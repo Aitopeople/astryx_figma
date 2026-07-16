@@ -6,11 +6,12 @@ This repository contains the working notes and agent instructions for mirroring 
 
 ## Status
 
-- Verified baseline: **Astryx v0.1.4** (`@astryxdesign/core` + `@astryxdesign/cli` `^0.1.4`).
-- 74 component group pages; props `1425/1425`; example cards `408/408`; 0 blocking mismatches.
-- Every component page carries the official **Usage** (import) + **Best practices** (Do/Don't) sections where they exist, plus official props and examples.
-- Full example-content audit complete (2026-07): example content and captions cross-checked against the official docs; 67 drift fixes applied. See `logs/`.
-- Known exception: `CircularProgress` has a live URL but is absent from the v0.1.4 sidebar, so it is kept as docs-only.
+<!-- AUTOMATION:STATUS:START -->
+- Verified baseline: **Astryx v0.1.6** (exact core + CLI match).
+- Official inventory: 149 components, 43 page templates, 584 block templates.
+- Figma integrity: 81 pages, 424 components, 60 component sets, 0 broken instances.
+- Latest verified state is summarized in `checkpoint.md`; Figma team-library publishing remains manual.
+<!-- AUTOMATION:STATUS:END -->
 
 ## Figma
 
@@ -26,7 +27,7 @@ Practical guidance for the Figma mirror work. It defines the core rule: use the 
 
 Main contents:
 
-- Accepted official sources, including the **preserved crawl** as the practical authoritative source (the official site is a client-rendered SPA, so `WebFetch`/curl return only the shell)
+- Accepted official sources, with preserved crawls treated only as version-matched fallback evidence
 - How to use Astryx MCP, the Astryx CLI, the official website, and Figma MCP together
 - The fast **text/token-diff audit method** (compare Figma preview text against the crawl card text) — preferred over screenshotting every frame
 - The two known **drift classes**: placeholder example content in structural/layout sets, and paraphrased captions on aggregate pages
@@ -78,10 +79,30 @@ The workflow is roughly:
 
 5. Write through Figma MCP, then read back to verify.
 
-   After creating or modifying nodes in Figma, perform a separate read step to confirm the changes were applied. To audit content efficiently, extract each example's preview text and token-diff it against the preserved crawl card text, then screenshot-verify only the structural rebuilds. Existing Figma text or component properties are not treated as official; everything is compared against the official Astryx docs.
+   After creating or modifying nodes in Figma, perform a separate read step to confirm the changes were applied. Text/token diffs cover content drift; every image, crop/fit, scrim, layout, and component-property visual change also requires screenshot verification. Existing Figma content is never treated as proof of the official source.
 
 6. Record discrepancies and next steps in `checkpoint.md`.
 
    If MCP and the website disagree, or if the Figma file still has structural issues, record the short current status in `checkpoint.md`. Put long audit details in a dated file under `logs/` and link to it from `checkpoint.md`.
 
 In short, the process collects component information from the Astryx CLI and official documentation, updates the Figma file through Figma MCP, and verifies the result against the official docs. The official Astryx documentation is always the source of truth; existing Figma content and agent assumptions are not.
+
+## Approved Agent Automation
+
+The control plane lives under `automation/`. Local scripts collect and normalize evidence, create a deterministic plan, hash the plan, validate human approval, and verify the result. Figma MCP access remains with the coordinator/editor/verifier agents defined in `automation/prompts/`.
+
+Typical run:
+
+```powershell
+npm run library:state -- init --run automation/runs/<run-id>
+npm run library:collect -- --run <run-id>
+npm run library:normalize-figma -- --input <raw-figma-read.json> --output automation/runs/<run-id>/figma-before.json
+npm run library:diff -- --official automation/runs/<run-id>/official.json --figma automation/runs/<run-id>/figma-before.json --run automation/runs/<run-id>
+npm run library:plan -- --diff automation/runs/<run-id>/diff.json --run automation/runs/<run-id>
+npm run library:approve -- --run automation/runs/<run-id> --approver <name> --operations all
+npm run library:validate -- --run automation/runs/<run-id> --figma-before automation/runs/<run-id>/figma-before.json
+```
+
+High-risk operations require their IDs through `--ack-high-risk`; bulk plans additionally require `--ack-bulk <planHash>`. These acknowledgements are intentionally not inferred from `--operations all`.
+
+After approval validation, the MCP-capable coordinator automatically continues with only the approved operation IDs. It then performs a separate readback and screenshot verification. Figma library publishing is never automated.

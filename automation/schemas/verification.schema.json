@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "astryx-verification-v1",
+  "type": "object",
+  "required": ["schemaVersion", "runId", "planHash", "verifiedAt", "status", "operationResults", "globalAssertions"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "runId": {"type": "string"},
+    "planHash": {"type": "string"},
+    "verifiedAt": {"type": "string"},
+    "status": {"enum": ["VERIFIED", "FAILED"]},
+    "operationResults": {"type": "array"},
+    "globalAssertions": {
+      "type": "object",
+      "required": ["brokenInstances", "activePlaceholders", "coverageComplete"],
+      "properties": {
+        "brokenInstances": {"type": "integer"},
+        "activePlaceholders": {"type": "integer"},
+        "coverageComplete": {"type": "boolean"}
+      }
+    }
+  }
+}

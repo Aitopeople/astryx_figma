@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "astryx-figma-v1",
+  "type": "object",
+  "required": ["schemaVersion", "fileKey", "generatedAt", "coverage", "inventory", "components", "pages", "variables", "styles"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "fileKey": {"type": "string"},
+    "generatedAt": {"type": "string"},
+    "coverage": {
+      "type": "object",
+      "required": ["complete", "batches"],
+      "properties": {
+        "complete": {"type": "boolean"},
+        "batches": {"type": "array"}
+      }
+    },
+    "inventory": {"type": "object"},
+    "components": {"type": "array", "items": {"type": "object", "required": ["name", "nodeId"]}},
+    "pages": {"type": "array"},
+    "variables": {"type": "array"},
+    "styles": {"type": "array"},
+    "instances": {"type": "array"},
+    "assets": {"type": "array"}
+  }
+}

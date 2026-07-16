@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "operationRisk": {
+    "UPDATE_DOCUMENTATION": "low",
+    "ADD_PROP_ROW": "low",
+    "ADD_EXAMPLE": "low",
+    "REPLACE_ASSET": "medium",
+    "UPDATE_COMPONENT_PROPERTY": "medium",
+    "ADD_VARIANT": "medium",
+    "UPDATE_LAYOUT": "medium",
+    "BIND_TOKEN": "medium",
+    "ADD_COMPONENT": "high",
+    "REMOVE_COMPONENT": "high",
+    "RENAME_COMPONENT": "high",
+    "REPLACE_COMPONENT_ID": "high",
+    "REMOVE_VARIANT": "high",
+    "REMOVE_COMPONENT_PROPERTY": "high"
+  },
+  "neverAutomate": [
+    "PUBLISH_LIBRARY",
+    "INVENT_PUBLIC_API",
+    "RESOLVE_SOURCE_CONFLICT"
+  ]
+}

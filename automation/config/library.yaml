@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "figma": {
+    "fileKey": "4YmLJEV002eWzvKLVQru5f",
+    "fileName": "astryx_design_system",
+    "readBatchSize": 12,
+    "writeBatchSize": 10
+  },
+  "packages": {
+    "core": "@astryxdesign/core",
+    "cli": "@astryxdesign/cli",
+    "versionPolicy": "exact-match"
+  },
+  "approval": {
+    "expiresInHours": 24,
+    "requireExplicitHighRiskIds": true
+  },
+  "risk": {
+    "bulkNodeThreshold": 25,
+    "bulkComponentThreshold": 5
+  },
+  "assetFetch": {
+    "allowedHosts": [
+      "developer.mozilla.org",
+      "github.githubassets.com",
+      "lookaside.facebook.com",
+      "pay.google.com",
+      "raw.githubusercontent.com",
+      "react.dev",
+      "www.paypalobjects.com",
+      "www.typescriptlang.org"
+    ]
+  },
+  "publishing": {
+    "mode": "manual"
+  }
+}

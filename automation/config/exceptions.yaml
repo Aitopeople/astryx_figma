@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "exceptions": [
+    {
+      "id": "legacy-circular-progress",
+      "scope": "component:CircularProgress",
+      "kind": "docs-only",
+      "rationale": "Absent from the Astryx 0.1.6 CLI registry; must not be published as official.",
+      "owner": "project",
+      "evidence": ["checkpoint.md:25"]
+    },
+    {
+      "id": "figma-font-substitution",
+      "scope": "foundation:typography",
+      "kind": "representation-gap",
+      "rationale": "Figma uses Inter and Roboto Mono for the official system-ui and monospace stacks.",
+      "owner": "project",
+      "evidence": ["checkpoint.md:26"]
+    },
+    {
+      "id": "approved-alert-dialog-hero",
+      "scope": "example:AlertDialog/Delete",
+      "kind": "user-approved",
+      "rationale": "User-approved hero promotion.",
+      "owner": "user",
+      "evidence": ["checkpoint.md:27"]
+    },
+    {
+      "id": "approved-card-compositions",
+      "scope": "component:Card/unofficial-compositions",
+      "kind": "user-approved",
+      "rationale": "User-approved unofficial composition section kept explicitly separate from official content.",
+      "owner": "user",
+      "evidence": ["checkpoint.md:27"]
+    },
+    {
+      "id": "source-driven-example-widths",
+      "scope": "examples:preview-width",
+      "kind": "source-backed",
+      "rationale": "Official preview widths may be 640, 680, 720, or 1040 and must not be normalized mechanically.",
+      "owner": "project",
+      "evidence": ["checkpoint.md:28"]
+    }
+  ]
+}

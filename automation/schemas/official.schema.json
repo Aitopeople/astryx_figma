@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "astryx-official-v1",
+  "type": "object",
+  "required": ["schemaVersion", "sourceVersion", "generatedAt", "inventory", "components", "templates", "tokens", "evidence"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "sourceVersion": {"type": "string"},
+    "generatedAt": {"type": "string"},
+    "inventory": {
+      "type": "object",
+      "required": ["components", "pageTemplates", "blockTemplates"],
+      "properties": {
+        "components": {"type": "integer"},
+        "pageTemplates": {"type": "integer"},
+        "blockTemplates": {"type": "integer"}
+      }
+    },
+    "components": {"type": "array", "items": {"type": "object", "required": ["name", "props", "evidence"]}},
+    "templates": {"type": "array", "items": {"type": "object", "required": ["id", "type"]}},
+    "tokens": {"type": ["object", "array"]},
+    "assets": {"type": "array"},
+    "evidence": {"type": "array"}
+  }
+}
