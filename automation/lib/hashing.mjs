@@ -17,3 +17,7 @@ export function hashObject(value, omittedKeys = []) {
 export async function sha256File(path) {
   return sha256Text(await readFile(path));
 }
+
+export function snapshotHash(snapshot) {
+  return snapshot?.integrity?.merkleRoot ?? hashObject(snapshot);
+}

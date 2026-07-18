@@ -35,7 +35,7 @@ MORE CLI:
 ## Project Memory
 
 - Read `checkpoint.md` first when resuming work; it is the current-state handoff, not a historical audit.
-- Read `advise.md` before any Figma MCP write.
+- Read only the routing section at the top of `advise.md`, then load the focused protocol files routed for the current task. Do not load the full historical reference on every run.
 - Put dated evidence and long audits in `logs/`, then link them from `checkpoint.md`.
 - Keep mutable inventory counts and active risks in `checkpoint.md` instead of duplicating them here.
 
@@ -68,7 +68,7 @@ Full mapping (each Figma tip reconciled against an Astryx rule): see `advise.md`
 
 ## Figma MCP asset and component rules
 
-- Read `checkpoint.md` and `advise.md` before modifying the mirror.
+- Read `checkpoint.md`, the `advise.md` routing section, and the routed focused protocols before modifying the mirror.
 - Derive assets and dimensions from current CLI templates/docs MCP, not from existing Figma placeholders or memory.
 - Treat generic mountains, rings, “IMG” labels, gradients, and gray boxes as provisional unless the official source contains them.
 - Use Figma `upload_assets` for raster files. Never use `figma.createImage()` or `figma.createImageAsync()` inside `use_figma`.
@@ -80,7 +80,7 @@ Full mapping (each Figma tip reconciled against an Astryx rule): see `advise.md`
 - Disable inherited auto-layout before assigning explicit child coordinates; otherwise Figma may silently move overlay content outside clipped bounds.
 - Prefer in-place component rebuilding to preserve instance links.
 - After every write, perform a separate read and screenshot QA. Confirm image fill/scale mode, property wiring, dimensions, child coordinates, clipping/overflow, zero active placeholders, and zero broken instances.
-- Follow `advise.md` → “Figma MCP Asset Production Protocol” for the complete workflow.
+- Follow `automation/protocols/component-production.md` and, for media work, `automation/protocols/visual-assets.md`. Consult the historical `advise.md` asset section only for an unresolved edge case.
 
 ## Approved-plan automation
 
@@ -88,4 +88,6 @@ Full mapping (each Figma tip reconciled against an Astryx rule): see `advise.md`
 - Do not write to Figma until `validate-approval.mjs` confirms the exact plan hash, before-state hash, version, operation scope, and expiry.
 - Execute only approved operation IDs. Any discovered additional work starts a new diff/plan/approval cycle.
 - Keep Figma reader, editor, and verifier roles separate using the prompt contracts in `automation/prompts/`.
+- Reuse exact-version official/asset caches. Default to target+dependency scoped snapshots merged with the latest verified baseline; use full-library reads only for the triggers in `automation/config/library.yaml`.
+- Run capability preflight, semantic verification, staged screenshot/hash reuse, and efficiency measurement for every applicable automated operation.
 - Verification failure cannot advance the baseline or generated status. Figma library publishing remains manual.

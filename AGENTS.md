@@ -35,7 +35,7 @@ MORE CLI:
 ## Project Memory
 
 - Read `checkpoint.md` first when resuming work; it is intentionally short.
-- Read `advise.md` for the detailed Figma mirror workflow and source rules.
+- Read only the routing section at the top of `advise.md`, then load the protocol files it routes to for the current task. Do not load the full historical reference on every run.
 - Put long audits and historical notes in `logs/`, then link them from `checkpoint.md`.
 - Keep `checkpoint.md` limited to current status, active risks, immediate next work, and log links.
 
@@ -79,7 +79,7 @@ Full mapping (each Figma tip reconciled against an Astryx rule): see `advise.md`
 - For explicit media/scrim coordinates, set `layoutMode = 'NONE'` before setting child positions. Reapply AUTO sizing to wrappers after children are appended.
 - Preserve existing component IDs where practical, then verify image fills, properties, bounds, clipping, overflow, active placeholders, and broken instances in a separate read.
 - Screenshot every changed asset-bearing component and containing official frame. A metadata-only check cannot verify crop, z-order, or visibility.
-- Detailed procedure: `advise.md` → “Figma MCP Asset Production Protocol”.
+- Detailed procedure: `automation/protocols/component-production.md` and `automation/protocols/visual-assets.md`; use the historical `advise.md` section only for unresolved edge cases.
 
 ## Approved-plan automation
 
@@ -87,4 +87,6 @@ Full mapping (each Figma tip reconciled against an Astryx rule): see `advise.md`
 - Figma writes require a valid `approval.json` bound to the exact `planHash`, `figmaBeforeHash`, Astryx version, approved operation IDs, and expiry.
 - The editor may execute only operations returned by `validate-approval.mjs`; newly discovered work requires a new diff, plan, and approval.
 - Use `automation/prompts/figma-reader.md`, `figma-editor.md`, and `verifier.md` as role contracts. Writing and verification must remain separate.
+- Reuse exact-version source/asset caches and default to target+dependency scoped snapshots merged with the latest verified baseline. Full-library reads are reserved for the triggers in `automation/config/library.yaml`.
+- Run capability preflight, semantic verification, staged screenshot/hash reuse, and efficiency measurement where applicable.
 - Failed verification never updates the verified baseline. Team-library publishing is always manual.

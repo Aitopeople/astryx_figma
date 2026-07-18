@@ -1,7 +1,8 @@
 import {resolve} from 'node:path';
-import {hashObject} from '../lib/hashing.mjs';
+import {hashObject, snapshotHash} from '../lib/hashing.mjs';
 import {parseArgs, readJson, requireArg, writeJson} from '../lib/io.mjs';
 import {assertArtifact} from '../lib/artifact-validation.mjs';
+import {readResolvedJson} from '../lib/content-store.mjs';
 
 export function validateApproval({plan, approval, figmaBefore, currentSourceVersion, now = new Date()}) {
   const errors = [];
@@ -12,7 +13,7 @@ export function validateApproval({plan, approval, figmaBefore, currentSourceVers
   if (approval.sourceVersion !== plan.sourceVersion) errors.push('approval sourceVersion does not match plan');
   if (currentSourceVersion && currentSourceVersion !== plan.sourceVersion) errors.push('installed Astryx version changed after planning');
   if (approval.figmaBeforeHash !== plan.figmaBeforeHash) errors.push('approval figmaBeforeHash does not match plan');
-  if (figmaBefore && hashObject(figmaBefore) !== plan.figmaBeforeHash) errors.push('current Figma before-snapshot hash changed after planning');
+  if (figmaBefore && snapshotHash(figmaBefore) !== plan.figmaBeforeHash) errors.push('current Figma before-snapshot hash changed after planning');
   if (!Number.isFinite(Date.parse(approval.expiresAt)) || now >= new Date(approval.expiresAt)) errors.push('approval is expired or invalid');
   const known = new Map(plan.operations.map((operation) => [operation.id, operation]));
   for (const id of approval.operationIds ?? []) {
@@ -37,7 +38,7 @@ async function main() {
   const runDir = resolve(requireArg(args, 'run'));
   const plan = await readJson(resolve(args.plan ?? resolve(runDir, 'plan.json')));
   const approval = await readJson(resolve(args.approval ?? resolve(runDir, 'approval.json')));
-  const figmaBefore = args['figma-before'] ? await readJson(resolve(args['figma-before'])) : null;
+  const figmaBefore = args['figma-before'] ? await readResolvedJson(resolve(args['figma-before'])) : null;
   await assertArtifact('plan', plan);
   await assertArtifact('approval', approval);
   if (figmaBefore) await assertArtifact('figma', figmaBefore);

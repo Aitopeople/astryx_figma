@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "blockedMechanics": {
+    "variantSpecificExposedInstanceSwapDefault": "Figma synchronizes an exposed nested-instance default across a component set.",
+    "manualXYInsideAutoLayout": "Auto Layout owns child coordinates; use padding, spacers, absolute positioning, or a non-auto-layout holder.",
+    "rotatedSemanticIcon": "Use the semantic directional icon instead of rotating a different glyph."
+  },
+  "requiredAssertions": {
+    "instanceSwap": ["swapped instance bounds are normalized after swap"],
+    "negativeSpacing": ["paint order and overlap region are screenshot-verified at 2x"],
+    "assetUpload": ["image hash, fill mode, clipping, intrinsic size, and placed size match source"]
+  }
+}

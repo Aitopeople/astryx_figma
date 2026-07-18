@@ -42,3 +42,15 @@ test('unknown schema versions fail closed', async () => {
   assert.ok(errors.some((error) => error.includes('schemaVersion')));
   assert.ok(errors.some((error) => error.includes('sourceVersion')));
 });
+
+test('compact operation result schema accepts root summaries without descendant ID floods', async () => {
+  const operationSchema = await schema('operation-result.schema.json');
+  const result = {
+    schemaVersion: 1,
+    operationId: 'op-1',
+    status: 'passed',
+    mutationSummary: {mutatedRoots: ['1:1'], createdRoots: [], mutatedDescendantCount: 54, createdDescendantCount: 0, resultDigest: 'abc'},
+    assertions: [{code: 'variant.count', passed: true}],
+  };
+  assert.doesNotThrow(() => assertSchema(operationSchema, result));
+});

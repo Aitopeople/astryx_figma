@@ -1,12 +1,14 @@
 import {resolve} from 'node:path';
-import {hashObject} from '../lib/hashing.mjs';
-import {parseArgs, readJson, readJsonYaml, requireArg, writeJson} from '../lib/io.mjs';
+import {hashObject, snapshotHash} from '../lib/hashing.mjs';
+import {parseArgs, readJsonYaml, requireArg, writeJson} from '../lib/io.mjs';
+import {readResolvedJson} from '../lib/content-store.mjs';
 import {matchException} from '../lib/policy.mjs';
 import {assertArtifact} from '../lib/artifact-validation.mjs';
+import {verifyContracts} from '../lib/semantic-verification.mjs';
 
 const args = parseArgs(process.argv.slice(2));
-const official = await readJson(resolve(requireArg(args, 'official')));
-const figma = await readJson(resolve(requireArg(args, 'figma')));
+const official = await readResolvedJson(resolve(requireArg(args, 'official')));
+const figma = await readResolvedJson(resolve(requireArg(args, 'figma')));
 await assertArtifact('official', official);
 await assertArtifact('figma', figma);
 if (!figma.coverage?.complete) throw new Error('Cannot create executable diff from partial Figma coverage');
@@ -120,6 +122,25 @@ for (const component of figma.components) {
   });
 }
 
+const semanticScope = String(args['semantic-scope'] ?? '').split(',').map((value) => value.trim()).filter(Boolean);
+if (semanticScope.length) {
+  const contracts = await readJsonYaml(resolve(args.contracts ?? resolve(configRoot, 'component-contracts.json')));
+  if (contracts.sourceVersion !== official.sourceVersion) throw new Error('Semantic component contracts do not match the official source version');
+  const semantic = verifyContracts(figma, contracts, semanticScope);
+  for (const assertion of semantic.assertions.filter((entry) => entry.passed !== true)) {
+    differences.push({
+      id: `semantic:${assertion.code}:${assertion.target}`,
+      status: 'unverifiable',
+      kind: 'semantic-contract',
+      identity: assertion.target,
+      official: {assertion: assertion.code},
+      figma: assertion.evidence,
+      suggestedOperation: null,
+      evidence: [`contract:${contracts.sourceVersion}:${assertion.code}`],
+    });
+  }
+}
+
 const generatedAt = [official.generatedAt, figma.generatedAt].filter(Boolean).sort().at(-1);
 const diff = {
   schemaVersion: 1,
@@ -127,7 +148,7 @@ const diff = {
   sourceVersion: official.sourceVersion,
   figmaFileKey: figma.fileKey,
   officialHash: hashObject(official),
-  figmaBeforeHash: hashObject(figma),
+  figmaBeforeHash: snapshotHash(figma),
   summary: Object.fromEntries(
     ['missing', 'extra', 'changed', 'conflicting', 'unverifiable', 'exception'].map((status) => [
       status,

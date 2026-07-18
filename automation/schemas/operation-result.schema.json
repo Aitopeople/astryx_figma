@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "astryx-operation-result-v1",
+  "type": "object",
+  "required": ["schemaVersion", "operationId", "status", "mutationSummary", "assertions"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "operationId": {"type": "string"},
+    "status": {"enum": ["passed", "failed", "blocked"]},
+    "mutationSummary": {
+      "type": "object",
+      "required": ["mutatedRoots", "createdRoots", "mutatedDescendantCount", "createdDescendantCount"],
+      "properties": {
+        "mutatedRoots": {"type": "array", "items": {"type": "string"}},
+        "createdRoots": {"type": "array", "items": {"type": "string"}},
+        "mutatedDescendantCount": {"type": "integer"},
+        "createdDescendantCount": {"type": "integer"},
+        "resultDigest": {"type": ["string", "null"]}
+      }
+    },
+    "detailNodeIds": {"type": "array", "items": {"type": "string"}},
+    "assertions": {"type": "array"},
+    "warnings": {"type": "array"},
+    "error": {"type": ["string", "null"]}
+  }
+}

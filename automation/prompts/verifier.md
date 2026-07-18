@@ -6,5 +6,7 @@
 - For visual operations, screenshot the changed component and containing official frame. Verify crop/fit, bounds, clipping, z-order, visibility, and overflow.
 - Verify component properties/variants, dependent instances, variables/styles, image fills/hashes where available, zero broken instances, zero active synthetic placeholders, and complete coverage.
 - Record `passed: true|false` for every assertion. Missing evidence is failure, not success.
+- Run aggregate structural and semantic checks before screenshots. If either fails, stop without spending screenshot/model-review budget and return only counts plus a bounded first page of failures.
+- Follow `screenshot-plan.json`: reuse unchanged hashes, capture the containing frame before individual crops, prefer contact sheets, and send only changed or ambiguous crops to model review.
 - Emit `figma-after.json` plus `operation-results.json`; then run `verify-run.mjs` to produce the final verdict.
 - Do not repair failures in the verifier. A failure starts a new actual-state diff and approval cycle.

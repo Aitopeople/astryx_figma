@@ -8,6 +8,7 @@ const SCHEMAS = Object.freeze({
   plan: 'change-plan.schema.json',
   approval: 'approval.schema.json',
   verification: 'verification.schema.json',
+  operationResult: 'operation-result.schema.json',
 });
 
 export async function assertArtifact(kind, value) {

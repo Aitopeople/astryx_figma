@@ -49,6 +49,7 @@ storageState*.json
 # Figma automation run payloads; force-add a compact verified run only when it is release evidence.
 automation/runs/*/
 !automation/runs/.gitkeep
+automation/cache/
 
 # Test/browser output, temporary downloads, and debug artifacts
 test-results/

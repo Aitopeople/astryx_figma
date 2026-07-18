@@ -17,6 +17,9 @@
         "brokenInstances": {"type": "integer"},
         "activePlaceholders": {"type": "integer"},
         "coverageComplete": {"type": "boolean"}
+        ,"semanticRequired": {"type": "boolean"}
+        ,"semanticStatus": {"type": ["string", "null"]}
+        ,"semanticFailedAssertions": {"type": ["integer", "null"]}
       }
     }
   }

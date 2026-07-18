@@ -2,6 +2,18 @@
 
 This directory is for maintaining the Figma mirror of the official Astryx design system.
 
+## Fast routing — read this first
+
+Do not load this entire historical guide into every task. Always read this routing section and the Golden Rule below, then load only the matching focused protocols:
+
+- Any automated run: `automation/protocols/run-efficiency.md`
+- Official source, docs, props, examples, or version resolution: `automation/protocols/source-resolution.md`
+- Component, variants, properties, slots, or Figma writes: `automation/protocols/component-production.md`
+- Images, crop/fit, scrims, screenshots, or visual QA: `automation/protocols/visual-assets.md`
+- Publishing or downstream refresh: `automation/protocols/publishing.md`
+
+The remainder of this file is retained as historical/reference detail. Read a relevant section only when a focused protocol links back to it or an unresolved edge case requires it.
+
 The goal is not to create a similar-looking design system. The goal is to keep the Figma file as a 1:1 mirror of the official Astryx docs.
 
 Figma file:
@@ -30,6 +42,17 @@ This applies to:
 If the official docs do not expose something, do not present it as official in Figma. If the official docs expose something, Figma must include it.
 
 Private implementation helpers are allowed only when Figma needs them to model an official slot or behavior that cannot otherwise be represented. Prefix them with `__`, keep them outside official documentation and publishing surfaces, derive them from official assets/components, and record why they exist. A private helper is a Figma mechanism, never a new Astryx component or prop.
+
+### User-Provided Material Icon Library (intentional exception)
+
+The page `Icons (Material Design Icons)` is an explicitly user-provided support library. Astryx permits consumers to supply their own icon library, so these assets are useful to the mirror but are **not official Astryx components**.
+
+- Keep each icon as an individual local component named `MATERIAL_ICONS / <Category> / <icon_name>`; icons are swap assets, not a variant matrix.
+- Preserve the imported 24x24 vector geometry and category placement. Do not redraw, simplify, normalize, or replace paths from memory.
+- Bind monochrome vector fills/strokes to the existing Astryx `color/icon/primary` variable. Do not invent a Material-specific color token.
+- Preserve the component description and shared plugin metadata that mark origin as `user-provided/material-design-icons` and `official=false`.
+- Never move these components into `OFFICIAL_COMPONENTS`, count them toward Astryx API parity, or infer Astryx props/examples from them.
+- When publishing the library, describe these as optional third-party icon assets rather than Astryx-owned API surface.
 
 ## Required Sources
 
@@ -304,13 +327,14 @@ If a Figma best practice would change a **name, prop, variant axis, token value,
 
 Automated Figma edits use the contracts in `automation/`:
 
-1. Collect immutable `official.json` and complete `figma-before.json` snapshots.
-2. Generate `diff.json` and a canonical, hashed `plan.json`.
-3. Present the exact hash, operations, evidence, risk, and verification requirements for human approval.
-4. Persist approval as `approval.json`; conversational context alone is not execution authority.
-5. Immediately before the first write, validate the plan hash, before-state hash, source version, operation scope, high-risk acknowledgements, and expiry.
-6. Execute only approved operation IDs using `automation/prompts/figma-editor.md`.
-7. Verify in a separate read using `automation/prompts/verifier.md`.
+1. Resolve the exact-version cached official artifact; `official.json` may be a small hash-bound reference.
+2. Generate `read-scope.json`, collect target+dependency evidence, and merge it with the latest complete verified baseline. Use a new complete full snapshot only for the configured full-read triggers.
+3. Generate `diff.json` and a canonical, hashed `plan.json` using the scoped snapshot Merkle root.
+4. Present the exact hash, operations, evidence, risk, and verification requirements for human approval.
+5. Persist approval as `approval.json`; conversational context alone is not execution authority.
+6. Immediately before the first write, validate capability constraints, plan hash, before-state hash, source version, operation scope, high-risk acknowledgements, and expiry.
+7. Execute only approved operation IDs using `automation/prompts/figma-editor.md` and compact root-level mutation results.
+8. Verify in a separate scoped read: structural → semantic → screenshot/hash-diff, then record efficiency metrics. Full readback is required only by the configured full-read triggers.
 
 If the source, plan, target precondition, or Figma state changes after approval, stop and generate a new plan. Do not amend a plan in place, reuse an old approval, improvise extra cleanup, or assume structural rollback. Library publishing remains manual.
 
@@ -500,8 +524,8 @@ Not allowed:
 If another agent continues this work:
 
 1. Read `AGENTS.md`.
-2. Read this `advise.md`.
-3. Read `checkpoint.md` from the top.
+2. Read `checkpoint.md` from the top.
+3. Read the routing section at the top of `advise.md`, then only the routed focused protocols. Read historical sections only when an unresolved edge case requires them.
 4. Confirm package/site version alignment.
 5. Use Astryx MCP, CLI metadata, rendered official website, and Figma MCP together.
 6. Make page-scoped Figma changes only.

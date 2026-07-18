@@ -11,10 +11,18 @@
     "library:validate-artifact": "node automation/scripts/validate-artifact.mjs",
     "library:state": "node automation/scripts/run-state.mjs",
     "library:verify": "node automation/scripts/verify-run.mjs",
+    "library:verify-semantics": "node automation/scripts/verify-semantics.mjs",
+    "library:validate-capabilities": "node automation/scripts/validate-capabilities.mjs",
+    "library:plan-screenshots": "node automation/scripts/plan-screenshots.mjs",
+    "library:measure": "node automation/scripts/measure-efficiency.mjs",
+    "library:publish-readiness": "node automation/scripts/validate-publish-readiness.mjs",
+    "library:visual-manifest": "node automation/scripts/build-visual-manifest.mjs",
+    "library:visual-diff": "node automation/scripts/compare-visual-manifests.mjs",
+    "library:plan-read-scope": "node automation/scripts/plan-read-scope.mjs",
     "library:report": "node automation/scripts/render-report.mjs",
     "library:docs": "node automation/scripts/update-docs.mjs",
     "library:check-status": "node automation/scripts/check-static-status.mjs",
-    "library:test": "node --test automation/tests/schemas.test.mjs automation/tests/diff-library.test.mjs automation/tests/approval-gate.test.mjs automation/tests/policy.test.mjs automation/tests/assets.test.mjs"
+    "library:test": "node --test automation/tests/schemas.test.mjs automation/tests/diff-library.test.mjs automation/tests/approval-gate.test.mjs automation/tests/policy.test.mjs automation/tests/assets.test.mjs automation/tests/efficiency.test.mjs"
   },
   "dependencies": {
     "@astryxdesign/core": "0.1.6"

@@ -16,6 +16,7 @@ function operationFor(difference) {
   const risk = classifyRisk(type, rules);
   const id = `op-${sha256Text(`${type}:${difference.identity}`).slice(0, 12)}`;
   const visual = ['REPLACE_ASSET', 'UPDATE_COMPONENT_PROPERTY', 'ADD_VARIANT', 'UPDATE_LAYOUT', 'BIND_TOKEN'].includes(type);
+  const semantic = visual || ['ADD_COMPONENT', 'REMOVE_COMPONENT', 'RENAME_COMPONENT', 'REPLACE_COMPONENT_ID', 'REMOVE_VARIANT', 'REMOVE_COMPONENT_PROPERTY'].includes(type);
   return {
     id,
     type,
@@ -33,10 +34,18 @@ function operationFor(difference) {
     verification: {
       readback: true,
       screenshot: visual,
+      semantic,
+      stageOrder: visual ? ['structural', 'semantic', 'screenshot'] : ['structural'],
       assertions: visual
-        ? ['target matches expected structure', 'bounds and clipping are valid', 'no broken dependent instances']
-        : ['target content matches expected official value'],
+        ? [
+            {code: 'structure.expected', message: 'target matches expected structure'},
+            {code: 'geometry.bounds', message: 'bounds and clipping are valid'},
+            {code: 'instance.integrity', message: 'no broken dependent instances'},
+          ]
+        : [{code: 'content.official', message: 'target content matches expected official value'}],
     },
+    mechanics: difference.mechanics ?? [],
+    resultContract: 'compact-v1',
   };
 }
 

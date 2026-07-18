@@ -7,20 +7,26 @@
     "schemaVersion": {"const": 1},
     "fileKey": {"type": "string"},
     "generatedAt": {"type": "string"},
+    "profile": {"type": "string"},
     "coverage": {
       "type": "object",
       "required": ["complete", "batches"],
       "properties": {
         "complete": {"type": "boolean"},
-        "batches": {"type": "array"}
+        "batches": {"type": "array"},
+        "mode": {"enum": ["full", "scoped"]},
+        "scope": {"type": "array", "items": {"type": "string"}},
+        "baselineHash": {"type": ["string", "null"]}
       }
     },
     "inventory": {"type": "object"},
     "components": {"type": "array", "items": {"type": "object", "required": ["name", "nodeId"]}},
+    "integrity": {"type": "object"},
     "pages": {"type": "array"},
     "variables": {"type": "array"},
     "styles": {"type": "array"},
     "instances": {"type": "array"},
-    "assets": {"type": "array"}
+    "assets": {"type": "array"},
+    "placeholders": {"type": "array"}
   }
 }

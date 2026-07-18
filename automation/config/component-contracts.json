@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "sourceVersion": "0.1.6",
+  "contracts": {
+    "MultiSelector": {
+      "expectedVariantCount": 54,
+      "variantAxes": {
+        "size": ["sm", "md", "lg"],
+        "triggerDisplay": ["badges", "count", "labels"],
+        "state": ["default", "error", "warning", "success", "disabled", "loading"]
+      },
+      "requiredProperties": ["label", "hasSearch", "hasSelectAll", "isDefaultOpen"],
+      "requiredPropertyReferences": ["hasSearch", "hasSelectAll", "isDefaultOpen"],
+      "requiredDescendants": ["options panel", "search wrapper", "search", "select all", "select-all-divider", "scrollbar/thumb", "__scroll-arrow / up", "__scroll-arrow / down"],
+      "forbiddenInstanceNamePatterns": ["check_box", "indeterminate_check_box"],
+      "geometryBySize": {
+        "sm": {"optionRowHeight": 28, "checkboxBox": 18, "selectAllHeight": 24},
+        "md": {"optionRowHeight": 36, "checkboxBox": 22, "selectAllHeight": 32},
+        "lg": {"optionRowHeight": 40, "checkboxBox": 22, "selectAllHeight": 32}
+      },
+      "sharedGeometry": {"panelWidth": 300, "panelHeight": 300, "searchWidth": 260, "contentWidth": 276, "scrollbarWidth": 8, "scrollbarHeight": 232},
+      "sourceEvidence": ["cli:component:MultiSelector@0.1.6", "cli:template:MultiSelectorColumnVisibilitySelector@0.1.6", "package:@astryxdesign/core@0.1.6/MultiSelector"]
+    },
+    "Selector": {
+      "expectedVariantCount": 3,
+      "variantAxes": {"size": ["sm", "md", "lg"]},
+      "requiredProperties": ["hasClear"],
+      "requiredPropertyReferences": ["hasClear"],
+      "sourceEvidence": ["cli:component:Selector@0.1.6", "package:@astryxdesign/core@0.1.6/Selector"]
+    }
+  }
+}

@@ -1,15 +1,17 @@
 import {mkdir, writeFile} from 'node:fs/promises';
 import {dirname, resolve} from 'node:path';
 import {parseArgs, readJson, requireArg} from '../lib/io.mjs';
+import {readResolvedJson} from '../lib/content-store.mjs';
 
 const args = parseArgs(process.argv.slice(2));
 const runDir = resolve(requireArg(args, 'run'));
 const [official, diff, plan] = await Promise.all([
-  readJson(resolve(runDir, 'official.json')),
+  readResolvedJson(resolve(runDir, 'official.json')),
   readJson(resolve(runDir, 'diff.json')),
   readJson(resolve(runDir, 'plan.json')),
 ]);
 const verification = await readJson(resolve(runDir, 'verification.json')).catch(() => null);
+const efficiency = await readJson(resolve(runDir, 'efficiency.json')).catch(() => null);
 const output = resolve(args.output ?? resolve(runDir, 'report.md'));
 const riskCounts = Object.fromEntries(['low', 'medium', 'high'].map((risk) => [risk, plan.operations.filter((entry) => entry.risk === risk).length]));
 const lines = [
@@ -31,8 +33,11 @@ const lines = [
   '## Verification',
   '',
   verification
-    ? `Global invariants: broken instances ${verification.globalAssertions.brokenInstances}, active placeholders ${verification.globalAssertions.activePlaceholders}, complete coverage ${verification.globalAssertions.coverageComplete}.`
+    ? `Global invariants: broken instances ${verification.globalAssertions.brokenInstances}, active placeholders ${verification.globalAssertions.activePlaceholders}, complete coverage ${verification.globalAssertions.coverageComplete}, semantic ${verification.globalAssertions.semanticStatus ?? 'not-required'}.`
     : 'Verification has not run. Do not claim the library is synchronized.',
+  efficiency
+    ? `Efficiency: ${(efficiency.totalBytes / 1024).toFixed(1)}KB run artifacts, ${efficiency.cacheHits} cache hits, ${efficiency.artifactReferences} references, ${efficiency.screenshots} screenshots (${efficiency.screenshotsReused} reused), ${efficiency.budgetWarnings.length} budget warnings.`
+    : 'Efficiency metrics were not recorded.',
   '',
   'Figma team-library publishing remains manual.',
   '',

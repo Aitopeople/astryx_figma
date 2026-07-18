@@ -1,8 +1,9 @@
-import {createHash} from 'node:crypto';
 import {lookup} from 'node:dns/promises';
 import {isIP} from 'node:net';
 import {resolve} from 'node:path';
 import {parseArgs, readJson, readJsonYaml, requireArg, writeJson} from '../lib/io.mjs';
+import {exists, putBytes, putJson, readResolvedJson, writeArtifactReference} from '../lib/content-store.mjs';
+import {sha256Text} from '../lib/hashing.mjs';
 
 export function imageDimensions(bytes) {
   if (bytes.length >= 24 && bytes.subarray(1, 4).toString('ascii') === 'PNG') {
@@ -73,25 +74,34 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   const input = resolve(requireArg(args, 'official'));
   const output = resolve(args.output ?? input);
-  const official = await readJson(input);
+  const official = await readResolvedJson(input);
   const config = await readJsonYaml(resolve(args.config ?? resolve(import.meta.dirname, '../config/library.yaml')));
+  const cacheRoot = resolve(args['cache-root'] ?? resolve(import.meta.dirname, '../cache'));
   const uniqueUrls = [...new Set((official.assets ?? []).map((entry) => entry.url).filter((url) => /^https?:/.test(url)))];
   const metadata = new Map(await mapConcurrent(uniqueUrls, Number(args.concurrency ?? 6), async (url) => {
+    const urlCachePath = resolve(cacheRoot, 'assets', 'urls', `${sha256Text(`${official.sourceVersion}:${url}`)}.json`);
+    if (args.refresh !== true && await exists(urlCachePath)) return [url, await readJson(urlCachePath)];
     try {
       const safeUrl = await assertSafeAssetUrl(url, lookup, config.assetFetch.allowedHosts);
       const response = await fetch(safeUrl, {signal: AbortSignal.timeout(Number(args.timeout ?? 20000)), redirect: 'error'});
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const bytes = Buffer.from(await response.arrayBuffer());
-      return [url, {
-        sha256: createHash('sha256').update(bytes).digest('hex'),
+      const intrinsic = imageDimensions(bytes);
+      const stored = await putBytes(cacheRoot, bytes, intrinsic?.format ?? 'bin');
+      const record = {
+        sha256: stored.sha256,
         byteLength: bytes.length,
         contentType: response.headers.get('content-type'),
-        intrinsic: imageDimensions(bytes),
+        intrinsic,
+        cachePath: stored.path,
         retrievedAt: new Date().toISOString(),
         error: null,
-      }];
+      };
+      await writeJson(urlCachePath, record);
+      return [url, record];
     } catch (error) {
-      return [url, {sha256: null, byteLength: null, contentType: null, intrinsic: null, retrievedAt: new Date().toISOString(), error: error.message}];
+      const record = {sha256: null, byteLength: null, contentType: null, intrinsic: null, cachePath: null, retrievedAt: new Date().toISOString(), error: error.message};
+      return [url, record];
     }
   }));
   official.assets = official.assets.map((entry) => ({...entry, ...metadata.get(entry.url)}));
@@ -106,7 +116,9 @@ async function main() {
     expectedUnavailable: [...new Set(official.assets.filter((entry) => entry.error && entry.expectedUnavailable).map((entry) => entry.url))],
     failures: uniqueFailures,
   };
-  await writeJson(output, official);
+  const cached = await putJson(cacheRoot, 'official-enriched', official);
+  if (args.materialize === true) await writeJson(output, official);
+  else await writeArtifactReference(output, cached.path, 'official', {sourceVersion: official.sourceVersion, enriched: true});
   process.stdout.write(`${JSON.stringify({output, ...official.assetCollection})}\n`);
   if (!official.assetCollection.complete && args.strict === true) process.exitCode = 1;
 }

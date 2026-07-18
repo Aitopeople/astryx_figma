@@ -1,108 +1,236 @@
 # Astryx Design System Figma Mirror
 
-This repository contains the working notes and agent instructions for mirroring the Astryx design system library into Figma and keeping that Figma file aligned with the official documentation.
+This repository maintains a source-backed Figma mirror of the official Astryx design system. The goal is exact public API, component, example, asset, token, and state fidelity—not a visually similar reinterpretation.
 
 <img src="Cover.png" alt="Astryx design system cover" width="100%" />
 
 ## Status
 
 <!-- AUTOMATION:STATUS:START -->
-- Verified baseline: **Astryx v0.1.6** (exact core + CLI match).
+- Verified baseline: **Astryx v0.1.6** with exact core/CLI versions.
 - Official inventory: 149 components, 43 page templates, 584 block templates.
-- Figma integrity: 81 pages, 424 components, 60 component sets, 0 broken instances.
-- Latest verified state is summarized in `checkpoint.md`; Figma team-library publishing remains manual.
+- Figma integrity: 81 pages, 2,885 components (763 Astryx mirror + 2,122 user-provided Material icons), 91 component sets, 0 broken instances.
+- Automation efficiency/semantic v2: 19 tests passing.
+- Current state and risks live in `checkpoint.md`; team-library publishing remains manual.
 <!-- AUTOMATION:STATUS:END -->
 
 ## Figma
 
-View the public Figma Community file:
-
 [Astryx Design System on Figma Community](https://www.figma.com/community/file/1655939158795671259)
+
+## Start Here
+
+Agents and maintainers follow the same entry flow:
+
+1. Read `checkpoint.md` for the current verified baseline, risks, and immediate work.
+2. Read only the routing section at the top of `advise.md`.
+3. Load the focused protocol files routed for the current task.
+4. For automated Figma work, follow `automation/prompts/coordinator.md`.
+5. Do not load all historical logs or the full `advise.md` unless an unresolved edge case requires them.
 
 ## Document Roles
 
-### `advise.md`
-
-Practical guidance for the Figma mirror work. It defines the core rule: use the official Astryx documentation as the source of truth, and do not invent components, examples, variants, or descriptions.
-
-Main contents:
-
-- Accepted official sources, with preserved crawls treated only as version-matched fallback evidence
-- How to use Astryx MCP, the Astryx CLI, the official website, and Figma MCP together
-- The fast **text/token-diff audit method** (compare Figma preview text against the crawl card text) — preferred over screenshotting every frame
-- The two known **drift classes**: placeholder example content in structural/layout sets, and paraphrased captions on aggregate pages
-- Official page structure (Usage / Best practices / Examples) and the Figma file naming conventions
-- Failure modes and `use_figma` gotchas found during earlier work
-- Verification steps to follow before and after writing to Figma
-
 ### `AGENTS.md`
 
-Project-specific instructions for AI coding agents such as Codex. It explains how to use the Astryx CLI, how to discover components before using them, and which styling and token rules must be followed.
-
-The main idea is: do not guess. Check the Astryx CLI and documentation first.
+Codex and general coding-agent entry instructions. It contains the non-negotiable Astryx CLI/token rules and routes Figma work into the new protocol and automation workflow.
 
 ### `.claude/CLAUDE.md`
 
-Claude-specific project instructions. Its contents are almost the same as `AGENTS.md`, so Claude follows the same Astryx workflow rules in this repository.
+Claude-specific entry instructions. It mirrors the same routing, scoped snapshot, semantic verification, and publishing boundaries as `AGENTS.md`. There is no separate root-level `CLAUDE.md`.
+
+### `advise.md`
+
+A compact routing section followed by retained historical/reference guidance. Agents read the routing section first and only open deeper legacy sections for unresolved edge cases.
+
+### `automation/protocols/`
+
+Focused instructions loaded by task type:
+
+- `run-efficiency.md` — cache, scope, compact result, and budget rules
+- `source-resolution.md` — official source precedence and cache invalidation
+- `component-production.md` — variants, properties, slots, lineage, and writes
+- `visual-assets.md` — images, crop/fit, staged screenshots, and hash reuse
+- `publishing.md` — manual publish and consumer smoke lifecycle
 
 ### `checkpoint.md`
 
-A short handoff file for resuming work. It keeps only the current status, current risks, immediate next actions, and links to detailed logs.
-
-Read `checkpoint.md` before starting new work. It is intentionally compact so agents do not spend unnecessary context on old audit history.
+Short current-state handoff only: verified baseline, active risks, immediate next work, and links to detailed logs.
 
 ### `logs/`
 
-Archived audit notes and detailed findings. Long historical records, component-by-component checks, and past discrepancy reports should live here instead of making `checkpoint.md` larger over time.
+Dated audits, source comparisons, verification evidence, failures, and historical details. These are not loaded by default.
 
-## How the Figma Migration Works
+### `automation/`
 
-The goal is not to create a design system that merely looks similar to Astryx. The goal is to mirror the official Astryx documentation in Figma as accurately as possible.
+The hash-bound control plane: cached source evidence, scoped Figma snapshots, semantic diff/contracts, deterministic plans, approval validation, constrained editing, independent verification, visual reuse, efficiency measurement, and publishing readiness.
 
-The workflow is roughly:
+## Source Rules
 
-1. Check the official Astryx documentation structure.
+- Discover with `npx astryx search`, `component`, and `template`; do not guess.
+- CLI component/template output is definitive for public API and example code.
+- Use package source when the cached contract lacks runtime anatomy, state, or geometry.
+- Use rendered docs/MCP for visible coverage, guidance, or a recorded conflict.
+- Existing Figma art is never proof of the official source.
+- Bind tokenable colors, spacing, radius, typography, and elevation to Astryx variables.
+- Preserve source-defined intrinsic media sizes and explicit rgba/gradient values only when no Astryx token represents them.
 
-   Use `npx astryx component --list`, `npx astryx search "<query>"`, Astryx MCP `search`, and the official website to identify the real official components and page groupings.
+## Automation v2 Workflow
 
-2. Collect official metadata for each component.
-
-   Use `npx astryx component <Name> --json` or Astryx MCP `get` to collect prop names, types, default values, descriptions, and examples. MCP output can be incomplete, so the visible Examples section on the official website must also be checked.
-
-3. Align the Figma page structure with the official docs.
-
-   Figma page names, groups, and sections should match the official Astryx documentation navigation. Do not merge unrelated official pages or split official groups arbitrarily.
-
-4. Build the component documentation and examples in Figma.
-
-   Each component page should include the official prop table, the Usage import block, the Best-practices Do/Don't table (where the official page has one), descriptions, and official examples. Examples should be represented as they appear in the official docs — exact titles, captions, item counts, and values — not replaced with simplified or approximated samples.
-
-5. Write through Figma MCP, then read back to verify.
-
-   After creating or modifying nodes in Figma, perform a separate read step to confirm the changes were applied. Text/token diffs cover content drift; every image, crop/fit, scrim, layout, and component-property visual change also requires screenshot verification. Existing Figma content is never treated as proof of the official source.
-
-6. Record discrepancies and next steps in `checkpoint.md`.
-
-   If MCP and the website disagree, or if the Figma file still has structural issues, record the short current status in `checkpoint.md`. Put long audit details in a dated file under `logs/` and link to it from `checkpoint.md`.
-
-In short, the process collects component information from the Astryx CLI and official documentation, updates the Figma file through Figma MCP, and verifies the result against the official docs. The official Astryx documentation is always the source of truth; existing Figma content and agent assumptions are not.
-
-## Approved Agent Automation
-
-The control plane lives under `automation/`. Local scripts collect and normalize evidence, create a deterministic plan, hash the plan, validate human approval, and verify the result. Figma MCP access remains with the coordinator/editor/verifier agents defined in `automation/prompts/`.
-
-Typical run:
+### 1. Initialize and reuse official evidence
 
 ```powershell
 npm run library:state -- init --run automation/runs/<run-id>
 npm run library:collect -- --run <run-id>
-npm run library:normalize-figma -- --input <raw-figma-read.json> --output automation/runs/<run-id>/figma-before.json
-npm run library:diff -- --official automation/runs/<run-id>/official.json --figma automation/runs/<run-id>/figma-before.json --run automation/runs/<run-id>
-npm run library:plan -- --diff automation/runs/<run-id>/diff.json --run automation/runs/<run-id>
-npm run library:approve -- --run automation/runs/<run-id> --approver <name> --operations all
-npm run library:validate -- --run automation/runs/<run-id> --figma-before automation/runs/<run-id>/figma-before.json
 ```
 
-High-risk operations require their IDs through `--ack-high-risk`; bulk plans additionally require `--ack-bulk <planHash>`. These acknowledgements are intentionally not inferred from `--operations all`.
+`library:collect` fingerprints the exact core package, CLI binary, lockfile, and collection mode. When unchanged, it performs no component/template detail calls and writes a small hash-bound `official.json` reference to the run.
 
-After approval validation, the MCP-capable coordinator automatically continues with only the approved operation IDs. It then performs a separate readback and screenshot verification. Figma library publishing is never automated.
+Raster source bytes are stored once by SHA-256 under the ignored `automation/cache/` store.
+
+### 2. Plan a target/dependency read scope
+
+```powershell
+npm run library:plan-read-scope -- `
+  --figma <verified-baseline.json> `
+  --components Selector,MultiSelector `
+  --run automation/runs/<run-id>
+```
+
+The Figma reader collects only the target pages, dependent-instance pages, and required foundations described by `read-scope.json`.
+
+Full 81-page reads are reserved for:
+
+- Astryx source-version changes
+- foundation changes
+- public component identity changes
+- bulk multi-page operations
+- publish readiness
+- scheduled full audits
+
+### 3. Merge the scoped read with the verified baseline
+
+```powershell
+npm run library:normalize-figma -- `
+  --input <scoped-figma-read.json> `
+  --baseline <verified-baseline.json> `
+  --scope Selector `
+  --output automation/runs/<run-id>/figma-before.json
+```
+
+Normalization emits per-page hashes, a foundation hash, and a Merkle root. Approval binds to that root instead of repeatedly serializing an unchanged full snapshot.
+
+### 4. Diff, plan, and preflight
+
+```powershell
+npm run library:diff -- `
+  --official automation/runs/<run-id>/official.json `
+  --figma automation/runs/<run-id>/figma-before.json `
+  --semantic-scope Selector,MultiSelector `
+  --run automation/runs/<run-id>
+
+npm run library:plan -- `
+  --diff automation/runs/<run-id>/diff.json `
+  --run automation/runs/<run-id>
+
+npm run library:validate-capabilities -- `
+  --plan automation/runs/<run-id>/plan.json
+
+npm run library:plan-screenshots -- `
+  --plan automation/runs/<run-id>/plan.json `
+  --run automation/runs/<run-id>
+```
+
+Capability preflight blocks known invalid Figma mechanics before approval, including variant-specific defaults for one exposed nested INSTANCE_SWAP, manual coordinates controlled by Auto Layout, and rotated substitute icons.
+
+### 5. Approve and validate exact scope
+
+```powershell
+npm run library:approve -- `
+  --run automation/runs/<run-id> `
+  --approver <name> `
+  --operations all
+
+npm run library:validate -- `
+  --run automation/runs/<run-id> `
+  --figma-before automation/runs/<run-id>/figma-before.json
+```
+
+High-risk operations require explicit `--ack-high-risk` IDs. Bulk plans additionally require `--ack-bulk <planHash>`. Approval never authorizes newly discovered work.
+
+### 6. Execute one component-set transaction
+
+The MCP editor executes only validated operation IDs. One approved public component set and its complete variant matrix are treated as one transaction.
+
+Operation results use compact root-level summaries:
+
+- mutated/created roots
+- descendant counts
+- result digest
+- typed assertions and warnings
+- leaf IDs only when required for rollback or targeted diagnosis
+
+### 7. Verify in cost order
+
+After a separate scoped readback and baseline merge:
+
+```powershell
+npm run library:verify-semantics -- `
+  --figma automation/runs/<run-id>/figma-after.json `
+  --scope Selector,MultiSelector `
+  --run automation/runs/<run-id>
+```
+
+Verification order is fixed:
+
+1. structural integrity
+2. semantic contract coverage
+3. screenshot/hash comparison
+
+If structure or semantics fail, screenshot work stops. Visual verification captures containing frames first, reuses byte-identical screenshot hashes, and queues only changed or ambiguous images for model review.
+
+```powershell
+npm run library:visual-manifest -- --dir <screenshot-dir> --output <manifest.json>
+npm run library:visual-diff -- `
+  --baseline <verified-visual-manifest.json> `
+  --current <manifest.json> `
+  --run automation/runs/<run-id>
+
+npm run library:verify -- --run automation/runs/<run-id>
+```
+
+Missing semantic evidence is failure. Legacy snapshots remain readable as historical evidence but must be recollected with reader-v2 fields when their pages are touched.
+
+### 8. Measure and report
+
+```powershell
+npm run library:measure -- --run automation/runs/<run-id>
+npm run library:report -- --run automation/runs/<run-id>
+```
+
+`efficiency.json` records cache hits, artifact references/bytes, scoped/full modes, Figma read/write calls, screenshots captured/reused, elapsed time, and budget warnings.
+
+### 9. Publish manually and verify a consumer
+
+Local verification and downstream delivery are separate states:
+
+```text
+VERIFIED
+→ READY_TO_PUBLISH
+→ PUBLISHED_MANUALLY
+→ CONSUMER_SMOKE_VERIFIED
+```
+
+Publish readiness requires a complete full snapshot, release notes, stable public keys, publish-status coverage, zero broken instances, and zero active placeholders. A consumer file must then refresh the library, insert a new instance, update an existing instance, and confirm stale entries are gone.
+
+Figma team-library publishing is never automated.
+
+## Verification and Tests
+
+```powershell
+npm run library:test
+npm run library:check-status
+```
+
+Current automation suite: 19 tests passing.
+
+Detailed implementation record: `logs/2026-07-18-automation-efficiency-semantic-v2.md`.

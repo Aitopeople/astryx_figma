@@ -17,7 +17,9 @@ You may mutate Figma only for operations returned by `validate-approval.mjs`.
 - Use `upload_assets` for raster media. Never use `figma.createImage()` or `createImageAsync()` in `use_figma`.
 - Bind tokenable values to Astryx variables; retain only source-backed fixed media/rgba/gradient exceptions.
 - Set `layoutMode = 'NONE'` before explicit child coordinates and reapply AUTO sizing after appending auto-layout children.
-- Return each operation ID, mutated node IDs, tool result, and any uncertainty in `operation-results.json`.
+- Return compact mutation summaries: operation ID, top-level mutated/created roots, descendant counts, result digest, assertions, warnings, and uncertainty. Return leaf IDs only when they are not contained by a returned root, are needed for rollback, or a failure requires targeted diagnosis. Do not stream thousands of descendant IDs into conversation.
+- Run `validate-capabilities.mjs` before writing and merge its required assertion augmentations into the operation result.
+- Treat one public component set and its complete approved variant matrix as one transaction; never repair only the representative variant when the approved contract covers the set.
 
 ## Forbidden
 

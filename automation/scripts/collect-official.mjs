@@ -5,6 +5,8 @@ import {resolve} from 'node:path';
 import {parseArgs, readJson, writeJson} from '../lib/io.mjs';
 import {extractAssetReferences} from '../lib/asset-references.mjs';
 import {assertArtifact} from '../lib/artifact-validation.mjs';
+import {exists, writeArtifactReference} from '../lib/content-store.mjs';
+import {sha256File, sha256Text} from '../lib/hashing.mjs';
 
 const execFileAsync = promisify(execFile);
 const args = parseArgs(process.argv.slice(2));
@@ -24,6 +26,25 @@ const runId = String(args.run ?? `astryx-${sourceVersion}-${new Date().toISOStri
 const output = resolve(args.output ?? resolve(root, 'automation/runs', runId, 'official.json'));
 const limit = args.limit ? Number(args.limit) : Infinity;
 const includeTemplateSource = args['skip-template-source'] !== true;
+const cacheRoot = resolve(args['cache-root'] ?? resolve(root, 'automation/cache'));
+const fingerprint = sha256Text(JSON.stringify({
+  sourceVersion,
+  cliVersion,
+  cliHash: await sha256File(cli),
+  lockHash: await sha256File(resolve(root, 'package-lock.json')).catch(() => null),
+  limit: Number.isFinite(limit) ? limit : null,
+  includeTemplateSource,
+}));
+const cachePath = resolve(cacheRoot, 'official', sourceVersion, `${fingerprint}.json`);
+
+if (args.refresh !== true && await exists(cachePath)) {
+  const cached = JSON.parse(await readFile(cachePath, 'utf8'));
+  await assertArtifact('official', cached);
+  if (args.materialize === true) await writeJson(output, cached);
+  else await writeArtifactReference(output, cachePath, 'official', {sourceVersion, cacheHit: true, fingerprint});
+  process.stdout.write(`${JSON.stringify({runId, output, cachePath, cacheHit: true, inventory: cached.inventory})}\n`);
+  process.exit(0);
+}
 
 async function runCli(cliArgs) {
   const {stdout} = await execFileAsync(process.execPath, [cli, ...cliArgs, '--json'], {
@@ -111,5 +132,7 @@ const official = {
 };
 
 await assertArtifact('official', official);
-await writeJson(output, official);
-process.stdout.write(`${JSON.stringify({runId, output, inventory: official.inventory})}\n`);
+await writeJson(cachePath, official);
+if (args.materialize === true) await writeJson(output, official);
+else await writeArtifactReference(output, cachePath, 'official', {sourceVersion, cacheHit: false, fingerprint});
+process.stdout.write(`${JSON.stringify({runId, output, cachePath, cacheHit: false, inventory: official.inventory})}\n`);

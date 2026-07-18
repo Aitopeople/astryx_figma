@@ -28,4 +28,6 @@ test('run state machine cannot skip approval or verification', () => {
   const approved = transitionRun({status: 'AWAITING_APPROVAL', history: []}, 'APPROVED');
   assert.equal(approved.status, 'APPROVED');
   assert.throws(() => assertTransition('APPLYING', 'VERIFIED'), /Invalid run transition/);
+  assert.equal(transitionRun({status: 'VERIFIED', history: []}, 'READY_TO_PUBLISH').status, 'READY_TO_PUBLISH');
+  assert.equal(transitionRun({status: 'PUBLISHED_MANUALLY', history: []}, 'CONSUMER_SMOKE_VERIFIED').status, 'CONSUMER_SMOKE_VERIFIED');
 });

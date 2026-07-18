@@ -1,0 +1,22 @@
+import {access} from 'node:fs/promises';
+import {resolve} from 'node:path';
+import {readResolvedJson} from '../lib/content-store.mjs';
+import {parseArgs, requireArg, writeJson} from '../lib/io.mjs';
+
+const args = parseArgs(process.argv.slice(2));
+const figma = await readResolvedJson(resolve(requireArg(args, 'figma')));
+const checks = [];
+const check = (code, passed, evidence = null) => checks.push({code, passed, evidence});
+check('coverage.full', figma.coverage?.complete === true && figma.coverage?.mode !== 'scoped', figma.coverage);
+check('instances.broken', Number(figma.inventory?.brokenInstances ?? -1) === 0, figma.inventory?.brokenInstances);
+check('placeholders.active', Number(figma.inventory?.activePlaceholders ?? -1) === 0, figma.inventory?.activePlaceholders);
+const publicSets = figma.components.filter((entry) => entry.nodeType === 'COMPONENT_SET' && entry.official !== false && !entry.name.startsWith('__'));
+check('public.keyCoverage', publicSets.length > 0 && publicSets.every((entry) => Boolean(entry.key)), {missing: publicSets.filter((entry) => !entry.key).map((entry) => entry.nodeId)});
+check('public.publishStatusCoverage', publicSets.every((entry) => Boolean(entry.publishStatus)), {missing: publicSets.filter((entry) => !entry.publishStatus).map((entry) => entry.nodeId)});
+const releaseNotes = args['release-notes'] ? resolve(args['release-notes']) : null;
+check('releaseNotes.present', Boolean(releaseNotes) && await access(releaseNotes).then(() => true).catch(() => false), releaseNotes);
+const result = {schemaVersion: 1, generatedAt: new Date().toISOString(), status: checks.every((entry) => entry.passed) ? 'READY_TO_PUBLISH' : 'BLOCKED', checks};
+const output = resolve(args.output ?? resolve(requireArg(args, 'run'), 'publish-readiness.json'));
+await writeJson(output, result);
+process.stdout.write(`${JSON.stringify({output, status: result.status, failed: checks.filter((entry) => !entry.passed).length})}\n`);
+if (result.status !== 'READY_TO_PUBLISH') process.exitCode = 1;

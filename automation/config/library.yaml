@@ -33,5 +33,21 @@
   },
   "publishing": {
     "mode": "manual"
+  },
+  "snapshot": {
+    "defaultMode": "scoped",
+    "fullReadTriggers": ["source-version-change", "foundation-change", "public-identity-change", "bulk-multi-page", "publish-readiness", "scheduled-audit"]
+  },
+  "verification": {
+    "stageOrder": ["structural", "semantic", "screenshot"],
+    "minimumVisualScale": 2,
+    "reuseScreenshotHashes": true,
+    "contactSheetPreferred": true
+  },
+  "efficiency": {
+    "maxScopedRunBytes": 5242880,
+    "maxScreenshotCount": 8,
+    "aggregateBeforeDetail": true,
+    "compactMutationResults": true
   }
 }
